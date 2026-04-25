@@ -19,10 +19,6 @@ METRICS_PATH = MODEL_DIR / "metrics.json"
 
 
 def create_seed_dataset() -> pd.DataFrame:
-    """
-    Создаём маленький датасет обращений.
-    В реальном проекте здесь были бы реальные support tickets.
-    """
 
     rows = [
         # BUG
@@ -240,16 +236,10 @@ def create_seed_dataset() -> pd.DataFrame:
 
 
 def train_models():
-    """
-    Обучаем две модели:
-    1. category_model — предсказывает категорию обращения
-    2. urgency_model — предсказывает срочность обращения
-    """
 
     DATA_DIR.mkdir(exist_ok=True)
     MODEL_DIR.mkdir(exist_ok=True)
 
-    # Создаём датасет, если его ещё нет
     if not DATA_PATH.exists():
         df = create_seed_dataset()
         df.to_csv(DATA_PATH, index=False)

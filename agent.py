@@ -36,10 +36,6 @@ URGENCY_HINTS = {
 
 
 def ensure_model_exists() -> None:
-    """
-    Проверяет, есть ли обученная sklearn-модель.
-    Если модели нет, автоматически запускает обучение.
-    """
     if not MODEL_PATH.exists():
         print("[setup] Модель не найдена. Запускаю обучение...")
         train_models()
@@ -56,9 +52,6 @@ URGENCY_MODEL = MODEL_BUNDLE["urgency_model"]
 
 
 def top_probabilities(model: Any, text: str, top_k: int = 3) -> list[dict[str, Any]]:
-    """
-    Возвращает top-k вероятностей классов.
-    """
     probabilities = model.predict_proba([text])[0]
     classes = model.classes_
 
@@ -78,12 +71,6 @@ def top_probabilities(model: Any, text: str, top_k: int = 3) -> list[dict[str, A
 
 
 def classify_ticket(text: str) -> dict[str, Any]:
-    """
-    ML tool.
-
-    Это главный инструмент агента:
-    он использует локальную sklearn-модель для классификации обращения.
-    """
     category = CATEGORY_MODEL.predict([text])[0]
     urgency = URGENCY_MODEL.predict([text])[0]
 
@@ -99,10 +86,6 @@ def classify_ticket(text: str) -> dict[str, Any]:
 
 
 def build_template_answer(tool_result: dict[str, Any]) -> str:
-    """
-    Fallback-ответ без LLM.
-    Нужен, чтобы проект всё равно работал, даже если Ollama временно не отвечает.
-    """
     category = tool_result["category"]
     urgency = tool_result["urgency"]
     team = tool_result["recommended_team"]
@@ -134,13 +117,6 @@ def build_template_answer(tool_result: dict[str, Any]) -> str:
 
 
 def ask_ollama(ticket_text: str, tool_result: dict[str, Any]) -> str:
-    """
-    Вызывает локальную LLM через Ollama.
-
-    Важно:
-    sklearn-tool уже был вызван до этого.
-    Ollama не классифицирует обращение сама, а только формирует финальный ответ.
-    """
     system_prompt = """
 Ты AI-агент для triage клиентских обращений.
 
@@ -194,15 +170,6 @@ def ask_ollama(ticket_text: str, tool_result: dict[str, Any]) -> str:
 
 
 def run_agent(ticket_text: str, local_only: bool = False) -> str:
-    """
-    Основной цикл агента.
-
-    1. Вызывает ML tool classify_ticket.
-    2. Печатает tool call и tool result.
-    3. Передаёт результат в Ollama.
-    4. Если Ollama не отвечает, использует локальный fallback.
-    """
-
     print()
     print(f"[tool call] classify_ticket({{'text': {repr(ticket_text)}}})")
 
